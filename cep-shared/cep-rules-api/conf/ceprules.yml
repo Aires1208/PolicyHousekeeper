@@ -1,0 +1,74 @@
+server:
+  type: simple
+  rootPath: '/service/*'
+  applicationContextPath: /
+  connector:
+    type: http
+    port: 9090
+
+swaggeconfig:
+  title: RulesAPI
+  version: 1
+  resourcePackage: com.zte
+
+logging:
+
+  # The default level of all loggers. Can be OFF, ERROR, WARN, INFO, DEBUG, TRACE, or ALL.
+  level: INFO
+
+  # Logger-specific levels.
+  loggers:
+    # Sets the level for 'com.example.app' to DEBUG.
+    com.zte.oespaas.cep.rules.service.Acceptor: DEBUG
+    com.zte.oespaas.cep.engine.io.kafka.KafkaSender: DEBUG
+  appenders:
+    - type: console
+      threshold: INFO
+      logFormat: "%d{yyyy-MM-dd HH:mm:ss SSS} %-5p [%c][%t] - %m%n"
+    - type: Sizefile
+      threshold: INFO
+      logFormat: "%d{yyyy-MM-dd HH:mm:ss SSS} %-5p [%c][%t] - %m%n"
+      currentLogFilename: ./log/cep.log
+      archivedLogFilenamePattern: ./zip/cep-%i.log.gz
+      maxFileSize: 20MB
+      archivedFileCount: 7
+
+msbClientConfig:
+  msbSvrIp: 10.43.137.187
+  msbSvrPort: '10081'
+database:
+  driverClass: org.h2.Driver
+  user: root
+  password: root
+  url: jdbc:h2:./db/ruleentity
+  properties:
+    charSet: UTF-8
+  maxWaitForConnection: 1s
+  validationQuery: "/* MyService Health Check */ SELECT 1"
+  minSize: 8
+  maxSize: 32
+  checkConnectionWhileIdle: false
+  evictionInterval: 10s
+  minIdleTime: 1 minute
+  dbServiceName: dbService
+  dbServiceVersion: v1
+
+# Kafka consumer configuration
+kafkaReceiveServer:
+     bootStrapServers: 127.0.0.1:9092
+     topic: policy_event
+     groupId: group12
+     autoCommitInterval: 1000
+     enableAutoCommit: true
+     sessionTimeout: 30000
+     autoOffsetReset: latest
+     keyDeserializerCalss: org.apache.kafka.common.serialization.StringDeserializer
+     valueDeserializerClass: org.apache.kafka.common.serialization.StringDeserializer
+
+# Kafka producer configuration
+kafkaSendServer:
+     bootStrapServers: 127.0.0.1:9092
+     topic: result_event
+     clientId: client12
+     keyDeserializerCalss: org.apache.kafka.common.serialization.LongSerializer
+     valueDeserializerClass: org.apache.kafka.common.serialization.StringSerializer
